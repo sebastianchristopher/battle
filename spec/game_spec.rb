@@ -13,4 +13,9 @@ describe Game do
     expect(player_2).to receive(:receive_damage).and_return(190)
     subject.attack(player_2)
   end
+  it 'can switch player turns' do
+    subject.switch_turn
+    expect(subject.current_player).to eq(player_2)
+    expect(subject.opponent).to eq(player_1)
+  end
 end

@@ -4,8 +4,7 @@ require_relative 'lib/game'
 
 class Battle < Sinatra::Base
   enable :sessions
-
-  $game
+  @@game
 
   get '/' do
     erb(:index)
@@ -13,23 +12,28 @@ class Battle < Sinatra::Base
 
   post '/names' do
     session[:attack?] = false
-    $game = Game.new(Player.new(params[:player_1]), Player.new(params[:player_2]))
+    @@game = Game.new(Player.new(params[:player_1]), Player.new(params[:player_2]))
     redirect '/play'
   end
 
   get '/play' do
     @attack = session[:attack?]
-    @player_1 = $game.player_1
-    @player_2 = $game.player_2
+    @game = @@game
+    @message = session[:message]
     erb(:play)
   end
 
   post '/attack' do
-    @player_1 = $game.player_1
-    @player_2 = $game.player_2
-    $game.attack(@player_2)
+    session[:message] = "#{@@game.current_player.name} attacked #{@@game.opponent.name}"
+    @@game.attack(@@game.switch_turn)
     session[:attack?] = true
+    redirect '/game-over' if @@game.loser
     redirect '/play'
+  end
+
+  get '/game-over' do
+    @loser = @@game.loser
+    erb(:game_over)
   end
 
   run! if app_file == $0
