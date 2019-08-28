@@ -17,16 +17,14 @@ class Battle < Sinatra::Base
   end
 
   get '/play' do
-    @attack = session[:attack?]
     @game = @@game
-    @message = session[:message]
+    @message = @@game.last_action
     erb(:play)
   end
 
   post '/attack' do
-    session[:message] = "#{@@game.current_player.name} attacked #{@@game.opponent.name}"
-    @@game.attack(@@game.switch_turn)
-    session[:attack?] = true
+    @@game.attack(@@game.opponent)
+    @@game.switch_turn
     redirect '/game-over' if @@game.loser
     redirect '/play'
   end
